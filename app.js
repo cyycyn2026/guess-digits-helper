@@ -49,21 +49,12 @@ $('assistTab').onclick=()=>switchMode('assist');$('practiceTab').onclick=()=>swi
 $('rulesBtn').onclick=()=>{if($('rules').showModal)$('rules').showModal();else $('rules').setAttribute('open','');};$('closeRules').onclick=()=>{if($('rules').close)$('rules').close();else $('rules').removeAttribute('open');};
 $('shareBtn').onclick=async()=>{const url=location.href.split('#')[0].split('?')[0];try{await navigator.clipboard.writeText(url);$('shareBtn').textContent='链接已复制，发给朋友吧';}catch(e){prompt('复制这个链接发送给朋友',url);}};
 const OWN_KEY='guess-web-own-v1';let ownSecret='';
-try{const saved=localStorage.getItem(OWN_KEY);if(saved&&!S.validateGuess(saved))ownSecret=saved;}catch(e){}
+try{ownSecret=localStorage.getItem(OWN_KEY)||'';}catch(e){}
 function updateOwnBadge(){$('ownBadge').textContent=ownSecret?'已记录 · '+ownSecret:'未记录';}
-function ownFeedback(){
- const guess=$('opponentGuess').value, result=$('opponentResult');result.className='opponent-result';
- if(!ownSecret){result.textContent='先保存自己的数字，再输入朋友的猜测。';return;}
- if(!guess){result.textContent='输入朋友的猜测，自动计算命中数。';return;}
- const error=S.validateGuess(guess);if(error){result.textContent=error;result.classList.add('error');return;}
- if($('ownSecret').value!==ownSecret){result.textContent='自己的数字已修改，请先保存再核对。';return;}
- const n=S.hit(guess,ownSecret);result.innerHTML='告诉朋友：中了 <strong>'+n+'</strong> 个'+(n===4?'，全部猜中了！':'。');
-}
-function validateOwn(){const v=$('ownSecret').value,error=v?S.validateGuess(v):'';$('saveOwn').disabled=!!S.validateGuess(v);$('ownValidation').textContent=error||'4 位数字不能重复，顺序不影响命中。';$('ownValidation').className='hint'+(error?' error':'');ownFeedback();}
-function clearOwn(){ownSecret='';$('ownSecret').value='';$('opponentGuess').value='';try{localStorage.removeItem(OWN_KEY);}catch(e){}updateOwnBadge();validateOwn();}
+function saveOwn(){ownSecret=$('ownSecret').value;updateOwnBadge();try{localStorage.setItem(OWN_KEY,ownSecret);$('ownValidation').textContent='修改后自动保存，只保存在本设备。';}catch(e){$('ownValidation').textContent='本次已记录，浏览器保存不可用。';}}
+function clearOwn(){$('ownSecret').value='';saveOwn();}
 $('ownBtn').onclick=()=>{$('ownSecret').focus();};
-$('ownSecret').addEventListener('input',validateOwn);$('opponentGuess').addEventListener('input',ownFeedback);
-$('ownForm').onsubmit=e=>{e.preventDefault();if(S.validateGuess($('ownSecret').value))return;ownSecret=$('ownSecret').value;try{localStorage.setItem(OWN_KEY,ownSecret);$('ownValidation').textContent='已保存，可以直接查看数字。';}catch(e){$('ownValidation').textContent='本次已记录，浏览器保存不可用，关闭后可能丢失。';}updateOwnBadge();ownFeedback();};
-$('clearOwn').onclick=clearOwn;$('ownSecret').value=ownSecret;updateOwnBadge();validateOwn();
+$('ownSecret').addEventListener('input',saveOwn);
+$('ownSecret').value=ownSecret;updateOwnBadge();
 render();
 })();

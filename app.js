@@ -61,10 +61,9 @@ function ownFeedback(){
 }
 function validateOwn(){const v=$('ownSecret').value,error=v?S.validateGuess(v):'';$('saveOwn').disabled=!!S.validateGuess(v);$('ownValidation').textContent=error||'4 位数字不能重复，顺序不影响命中。';$('ownValidation').className='hint'+(error?' error':'');ownFeedback();}
 function clearOwn(){ownSecret='';$('ownSecret').value='';$('opponentGuess').value='';try{localStorage.removeItem(OWN_KEY);}catch(e){}updateOwnBadge();validateOwn();}
-$('ownBtn').onclick=()=>{$('ownSecret').value=ownSecret;$('opponentGuess').value='';validateOwn();if($('ownDialog').showModal)$('ownDialog').showModal();else $('ownDialog').setAttribute('open','');};
-$('closeOwn').onclick=()=>{if($('ownDialog').close)$('ownDialog').close();else $('ownDialog').removeAttribute('open');};
+$('ownBtn').onclick=()=>{$('ownSecret').focus();};
 $('ownSecret').addEventListener('input',validateOwn);$('opponentGuess').addEventListener('input',ownFeedback);
 $('ownForm').onsubmit=e=>{e.preventDefault();if(S.validateGuess($('ownSecret').value))return;ownSecret=$('ownSecret').value;try{localStorage.setItem(OWN_KEY,ownSecret);$('ownValidation').textContent='已保存，可以直接查看数字。';}catch(e){$('ownValidation').textContent='本次已记录，浏览器保存不可用，关闭后可能丢失。';}updateOwnBadge();ownFeedback();};
-$('clearOwn').onclick=clearOwn;updateOwnBadge();
+$('clearOwn').onclick=clearOwn;$('ownSecret').value=ownSecret;updateOwnBadge();validateOwn();
 render();
 })();
